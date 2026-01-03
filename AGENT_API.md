@@ -19,6 +19,52 @@ Response:
 }
 ```
 
+### POST /api/subtrees
+
+Create a new subtree and link it to the system tree.
+
+```bash
+curl -X POST http://localhost:3001/api/subtrees \
+  -H "Content-Type: application/json" \
+  -d '{
+    "yaml": "name: My Feature\nversion: 1.0.0\nnodes:\n  - id: step-1\n    name: First Step\n    status: planned"
+  }'
+```
+
+**Parameters:**
+- `yaml` (required): Raw YAML content for the subtree
+- `attachTo` (optional): ID of an existing system node to attach the subtree to
+
+**Behavior:**
+- Creates a new tree file named after the slugified tree name (e.g., "My Feature" → `my-feature.yaml`)
+- If `attachTo` is provided: updates that existing node's `subtree` field
+- If `attachTo` is omitted: creates a new node on the system tree linking to the subtree
+
+**Examples:**
+
+Create subtree with new system node:
+```bash
+curl -X POST http://localhost:3001/api/subtrees \
+  -H "Content-Type: application/json" \
+  -d '{"yaml": "name: Auth System\nversion: 1.0.0\nnodes:\n  - id: login\n    name: Login Flow\n    status: planned"}'
+```
+
+Attach subtree to existing node:
+```bash
+curl -X POST http://localhost:3001/api/subtrees \
+  -H "Content-Type: application/json" \
+  -d '{"yaml": "name: PDF Details\nversion: 1.0.0\nnodes:\n  - id: ocr\n    name: OCR\n    status: planned", "attachTo": "pdf-parsing"}'
+```
+
+Response:
+```json
+{
+  "subtree": { ... },
+  "systemNode": { ... },
+  "message": "Subtree created with new system node 'auth-system'"
+}
+```
+
 ### GET /api/trees/:name
 
 Fetch a specific tree.

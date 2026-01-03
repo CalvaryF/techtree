@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import type { MultiTreeStore } from "./store.js";
+import { parseTechTree } from "@techtree/core";
 
 const DEFAULT_TREE = "system";
 
@@ -8,6 +9,16 @@ function serializeTree(tree: { tiers: Map<number, unknown[]> }) {
     ...tree,
     tiers: Object.fromEntries(tree.tiers),
   };
+}
+
+/**
+ * Convert a name to a URL-safe slug
+ */
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export function createRouter(store: MultiTreeStore): Router {
@@ -21,6 +32,78 @@ export function createRouter(store: MultiTreeStore): Router {
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       res.status(500).json({ error: message });
+    }
+  });
+
+  // POST /api/subtrees - Create a new subtree and link it to the system tree
+  router.post("/subtrees", async (req: Request, res: Response) => {
+    try {
+      const { yaml, attachTo } = req.body;
+
+      if (!yaml || typeof yaml !== "string") {
+        res.status(400).json({ error: "Missing or invalid 'yaml' field" });
+        return;
+      }
+
+      // Parse the YAML to get the tree name
+      const parseResult = parseTechTree(yaml);
+      if (!parseResult.success) {
+        res.status(400).json({ error: `Invalid YAML: ${parseResult.error}` });
+        return;
+      }
+
+      const subtreeName = slugify(parseResult.data.name);
+
+      // Check if subtree already exists
+      if (await store.exists(subtreeName)) {
+        res.status(409).json({ error: `Subtree already exists: ${subtreeName}` });
+        return;
+      }
+
+      // Create the subtree
+      const subtree = await store.createFromYaml(subtreeName, yaml);
+
+      let systemNode;
+
+      if (attachTo) {
+        // Attach to existing node
+        const systemTree = await store.updateNode(DEFAULT_TREE, attachTo, {
+          subtree: subtreeName,
+        });
+        systemNode = systemTree.nodes.find((n) => n.id === attachTo);
+      } else {
+        // Create a new node on the system tree
+        const newNodeId = subtreeName;
+        const newNode = {
+          id: newNodeId,
+          name: parseResult.data.name,
+          description: parseResult.data.description,
+          status: "planned" as const,
+          prerequisites: [] as string[],
+          subtree: subtreeName,
+          tags: [] as string[],
+        };
+
+        const systemTree = await store.addNode(DEFAULT_TREE, newNode);
+        systemNode = systemTree.nodes.find((n) => n.id === newNodeId);
+      }
+
+      res.status(201).json({
+        subtree: serializeTree(subtree),
+        systemNode,
+        message: attachTo
+          ? `Subtree created and attached to node '${attachTo}'`
+          : `Subtree created with new system node '${subtreeName}'`,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      if (message.includes("not found")) {
+        res.status(404).json({ error: message });
+      } else if (message.includes("already exists")) {
+        res.status(409).json({ error: message });
+      } else {
+        res.status(400).json({ error: message });
+      }
     }
   });
 

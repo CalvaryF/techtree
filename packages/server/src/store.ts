@@ -110,6 +110,45 @@ export class MultiTreeStore {
       return false;
     }
   }
+
+  /**
+   * Add a node to a specific tree
+   */
+  async addNode(
+    treeName: string,
+    node: TechNode
+  ): Promise<ComputedTechTree> {
+    const tree = await this.loadRaw(treeName);
+
+    // Check if node with this ID already exists
+    if (tree.nodes.some((n) => n.id === node.id)) {
+      throw new Error(`Node already exists: ${node.id}`);
+    }
+
+    tree.nodes.push(node);
+    await this.save(treeName, tree);
+    return computeTechTree(tree);
+  }
+
+  /**
+   * Create a new tree from raw YAML content
+   */
+  async createFromYaml(name: string, yamlContent: string): Promise<ComputedTechTree> {
+    // Check if tree already exists
+    if (await this.exists(name)) {
+      throw new Error(`Tree already exists: ${name}`);
+    }
+
+    // Validate the YAML
+    const result = parseTechTree(yamlContent);
+    if (!result.success) {
+      throw new Error(`Invalid YAML: ${result.error}`);
+    }
+
+    // Save the tree
+    await writeFile(this.getFilePath(name), yamlContent, "utf-8");
+    return computeTechTree(result.data);
+  }
 }
 
 // Keep backward compatibility - TreeStore wraps MultiTreeStore for a single file
