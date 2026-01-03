@@ -88,6 +88,7 @@ export function TechTree({
             node,
             isHighlighted: highlightedNodes?.has(node.id) ?? false,
             isDimmed: dimmedNodes?.has(node.id) ?? false,
+            onDoubleClick: onNodeDoubleClick,
           },
           sourcePosition: Position.Bottom,
           targetPosition: Position.Top,
@@ -96,7 +97,7 @@ export function TechTree({
     });
 
     return nodes;
-  }, [tree.nodes, highlightedNodes, dimmedNodes]);
+  }, [tree.nodes, highlightedNodes, dimmedNodes, onNodeDoubleClick]);
 
   // Convert to React Flow edges
   const initialEdges: Edge[] = useMemo(() => {

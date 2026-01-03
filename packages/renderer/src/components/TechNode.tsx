@@ -6,6 +6,7 @@ export interface TechNodeData {
   node: ComputedTechNode;
   isHighlighted: boolean;
   isDimmed: boolean;
+  onDoubleClick?: (node: ComputedTechNode) => void;
 }
 
 interface TechNodeProps {
@@ -32,13 +33,21 @@ const STATUS_STYLES: Record<NodeStatus, { border: string; dot: string }> = {
 };
 
 export const TechNode = memo(({ data }: TechNodeProps) => {
-  const { node, isHighlighted, isDimmed } = data;
+  const { node, isHighlighted, isDimmed, onDoubleClick } = data;
   const styles = STATUS_STYLES[node.status];
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (node.subtree && onDoubleClick) {
+      onDoubleClick(node);
+    }
+  };
 
   return (
     <>
       <Handle type="target" position={Position.Top} className="!bg-neutral-300 !w-2 !h-2 !border-0" />
       <div
+        onDoubleClick={handleDoubleClick}
         className={`
           w-56 px-4 py-3 rounded-md border bg-white
           transition-all cursor-pointer select-none
