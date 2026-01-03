@@ -1,0 +1,109 @@
+name: "AI Pipeline System"
+version: "1.0.0"
+description: "Capability development tree for the document processing system"
+
+nodes:
+  # Tier 1: Foundation capabilities
+  - id: "pdf-parsing"
+    name: "PDF Parsing"
+    description: "Ability to extract text and structure from PDFs"
+    repo: "github.com/user/pdf-parser"
+    status: "completed"
+    devPoints: 3
+    subtree: "pdf-parser"
+    tags: ["extraction", "documents"]
+
+  - id: "llm-integration"
+    name: "LLM Integration"
+    description: "Core LLM API integration and prompt management"
+    repo: "github.com/user/llm-tools"
+    status: "completed"
+    devPoints: 5
+    tags: ["llm", "core"]
+
+  - id: "web-scraping"
+    name: "Web Scraping"
+    description: "Extract content from web pages"
+    repo: "github.com/user/scrapers"
+    status: "completed"
+    devPoints: 4
+    tags: ["extraction", "web"]
+
+  # Tier 2: Built on foundations
+  - id: "summarization"
+    name: "Document Summarization"
+    description: "Generate concise summaries of documents"
+    repo: "github.com/user/llm-tools"
+    status: "in-progress"
+    prerequisites:
+      - "pdf-parsing"
+      - "llm-integration"
+    devPoints: 2
+
+  - id: "embeddings"
+    name: "Embedding Generation"
+    description: "Create vector embeddings for semantic operations"
+    repo: "github.com/user/embeddings"
+    status: "planned"
+    prerequisites:
+      - "pdf-parsing"
+    devPoints: 4
+
+  - id: "content-classifier"
+    name: "Content Classifier"
+    description: "Categorize and tag content automatically"
+    repo: "github.com/user/llm-tools"
+    status: "planned"
+    prerequisites:
+      - "llm-integration"
+    devPoints: 3
+
+  # Tier 3: Advanced capabilities
+  - id: "semantic-search"
+    name: "Semantic Search"
+    description: "Find relevant content using embeddings"
+    status: "planned"
+    prerequisites:
+      - "embeddings"
+    devPoints: 3
+
+  - id: "entity-extraction"
+    name: "Entity Extraction"
+    description: "Extract named entities from documents"
+    prerequisites:
+      - "summarization"
+      - "content-classifier"
+    status: "planned"
+    devPoints: 4
+
+  # Tier 4: Complex systems
+  - id: "rag"
+    name: "RAG System"
+    description: "Retrieval augmented generation capability"
+    repo: "github.com/user/rag"
+    status: "blocked"
+    blockedReason: "Waiting on embedding model selection"
+    prerequisites:
+      - "summarization"
+      - "semantic-search"
+    devPoints: 8
+
+  - id: "knowledge-graph"
+    name: "Knowledge Graph"
+    description: "Build and query knowledge graphs from extracted entities"
+    prerequisites:
+      - "entity-extraction"
+      - "semantic-search"
+    status: "planned"
+    devPoints: 10
+
+  # Tier 5: End-to-end systems
+  - id: "agent-orchestrator"
+    name: "Agent Orchestrator"
+    description: "Coordinate multiple agents for complex tasks"
+    prerequisites:
+      - "rag"
+      - "knowledge-graph"
+    status: "planned"
+    devPoints: 15
+    tags: ["agents", "orchestration"]

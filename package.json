@@ -1,0 +1,23 @@
+{
+  "name": "techtree",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Factorio-inspired tech tree visualization for capability development planning",
+  "workspaces": [
+    "packages/*",
+    "viewer"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=techtree-viewer",
+    "server": "npm run start --workspace=@techtree/server",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
