@@ -86,6 +86,15 @@ export function App() {
     [selectedNodeId]
   );
 
+  const handleNodeDoubleClick = useCallback(
+    (node: ComputedTechNode) => {
+      if (node.subtree && availableTrees.includes(node.subtree)) {
+        setTreePath((prev) => [...prev, node.subtree!]);
+      }
+    },
+    [availableTrees]
+  );
+
   const handleStatusChange = useCallback(
     async (nodeId: string, status: string) => {
       try {
@@ -172,6 +181,7 @@ export function App() {
               tree={tree}
               selectedNodeId={selectedNodeId}
               onNodeClick={handleNodeClick}
+              onNodeDoubleClick={handleNodeDoubleClick}
               onBackgroundClick={() => {
                 setSelectedNodeId(null);
                 setShowDetails(false);

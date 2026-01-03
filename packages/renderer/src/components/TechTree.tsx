@@ -18,6 +18,7 @@ export interface TechTreeProps {
   tree: ComputedTechTree;
   selectedNodeId?: string | null;
   onNodeClick?: (node: ComputedTechNode) => void;
+  onNodeDoubleClick?: (node: ComputedTechNode) => void;
   onBackgroundClick?: () => void;
 }
 
@@ -29,6 +30,7 @@ export function TechTree({
   tree,
   selectedNodeId,
   onNodeClick,
+  onNodeDoubleClick,
   onBackgroundClick,
 }: TechTreeProps) {
   // Calculate highlighted nodes based on selection
@@ -139,6 +141,16 @@ export function TechTree({
     [tree.nodes, onNodeClick]
   );
 
+  const handleNodeDoubleClick = useCallback(
+    (_: React.MouseEvent, node: Node) => {
+      const techNode = tree.nodes.find((n) => n.id === node.id);
+      if (techNode) {
+        onNodeDoubleClick?.(techNode);
+      }
+    },
+    [tree.nodes, onNodeDoubleClick]
+  );
+
   const handlePaneClick = useCallback(() => {
     onBackgroundClick?.();
   }, [onBackgroundClick]);
@@ -161,6 +173,7 @@ export function TechTree({
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onNodeClick={handleNodeClick}
+          onNodeDoubleClick={handleNodeDoubleClick}
           onPaneClick={handlePaneClick}
           nodeTypes={nodeTypes}
           fitView
