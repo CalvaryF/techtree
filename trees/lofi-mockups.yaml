@@ -1,0 +1,9 @@
+name: Lofi Mockups
+version: 1.0.0
+description: Subtree for lofi mockup creation capabilities
+
+nodes:
+  - id: wireframe-gen
+    name: Wireframe Generation
+    description: Generate basic wireframe layouts
+    status: planned
