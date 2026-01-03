@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useRef, useEffect } from "react";
 import { Handle, Position } from "@xyflow/react";
 import type { ComputedTechNode, NodeStatus } from "@techtree/core";
 
@@ -35,19 +35,29 @@ const STATUS_STYLES: Record<NodeStatus, { border: string; dot: string }> = {
 export const TechNode = memo(({ data }: TechNodeProps) => {
   const { node, isHighlighted, isDimmed, onDoubleClick } = data;
   const styles = STATUS_STYLES[node.status];
+  const divRef = useRef<HTMLDivElement>(null);
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (node.subtree && onDoubleClick) {
-      onDoubleClick(node);
-    }
-  };
+  useEffect(() => {
+    const div = divRef.current;
+    if (!div) return;
+
+    const handleDblClick = (e: MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (node.subtree && onDoubleClick) {
+        onDoubleClick(node);
+      }
+    };
+
+    div.addEventListener("dblclick", handleDblClick, true);
+    return () => div.removeEventListener("dblclick", handleDblClick, true);
+  }, [node, onDoubleClick]);
 
   return (
     <>
       <Handle type="target" position={Position.Top} className="!bg-neutral-300 !w-2 !h-2 !border-0" />
       <div
-        onDoubleClick={handleDoubleClick}
+        ref={divRef}
         className={`
           w-56 px-4 py-3 rounded-md border bg-white
           transition-all cursor-pointer select-none
